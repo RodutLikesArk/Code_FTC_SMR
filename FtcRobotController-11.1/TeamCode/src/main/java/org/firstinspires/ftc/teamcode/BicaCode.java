@@ -8,8 +8,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -22,6 +24,9 @@ public class BicaCode extends OpMode
 {
     //initializare variabile
     GoBildaPinpointDriver odo;
+    AnalogInput distanceSensor;
+    double voltage;
+    double distancemm;
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -33,7 +38,9 @@ public class BicaCode extends OpMode
     //functie de initializare
     @Override
     public void init() {
+
         //definirea pieselor conectate cu numele corespunzatoare introduse in driver hub
+        distanceSensor = hardwareMap.get(AnalogInput.class, "distSens");
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "OdometryC");
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
@@ -65,6 +72,10 @@ public class BicaCode extends OpMode
     //functie repetitiva
     @Override
     public void loop() {
+        //calcularea distantei
+        voltage = distanceSensor.getVoltage();
+        distancemm = (voltage / 3.3) * 1000.0;
+
         //actualizarea calculatorului de odometrie
         odo.update();
         //actualizarea unei variabile de pozitie
@@ -86,6 +97,7 @@ public class BicaCode extends OpMode
         telemetry.addData("Version", odo.getDeviceVersion());
         telemetry.addData("X", pos.getX(DistanceUnit.MM));
         telemetry.addData("Y", pos.getY(DistanceUnit.MM));
+        telemetry.addData("Dist", distancemm);
         updateTelemetry(telemetry);
     }
 }
