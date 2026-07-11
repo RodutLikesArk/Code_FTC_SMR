@@ -2,6 +2,10 @@
 //initializarea librariilor pe care le foloseste acest cod
 package org.firstinspires.ftc.teamcode;
 
+import static androidx.core.math.MathUtils.clamp;
+
+import androidx.core.math.MathUtils;
+
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -9,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -25,8 +30,10 @@ public class BicaCode extends OpMode
     //initializare variabile
     GoBildaPinpointDriver odo;
     AnalogInput distanceSensor;
+    Servo TSTServo;
     double voltage;
     double distancemm;
+    double SVpos = 0.5;
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -44,6 +51,7 @@ public class BicaCode extends OpMode
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "OdometryC");
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+        TSTServo = hardwareMap.get(Servo.class, "S1");
 
         //initializarea calculatorului pentru odometrie
         odo.setOffsets(-84.0, -168.0, DistanceUnit.MM);
@@ -86,6 +94,11 @@ public class BicaCode extends OpMode
         turn  =  gamepad1.right_stick_x;
         leftPower = Range.clip(drive + turn, -1.0, 1.0) ;
         rightPower = Range.clip(drive - turn, -1.0, 1.0) ;
+
+        //simplu test de servo. Foloseste D-pad stanga si dreapta pentru a controla servo-ul
+        SVpos = SVpos - 0.005 * (gamepad1.dpad_left ? 1.0 : 0.0) + 0.005 * (gamepad1.dpad_right ? 1.0 : 0.0);
+        SVpos = clamp(SVpos, 0.0, 1.0);
+        TSTServo.setPosition(SVpos);
 
         //adaugarea acelei puteri
         leftDrive.setPower(leftPower);
